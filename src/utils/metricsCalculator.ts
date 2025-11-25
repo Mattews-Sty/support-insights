@@ -128,7 +128,11 @@ const calculateSLACompliance = (tickets: ProcessedTicket[]): Record<string, numb
 };
 
 export const getAvailableSprints = (tickets: ProcessedTicket[]): number[] => {
-  const sprints = new Set(tickets.map((t) => t.sprint));
+  const sprints = new Set(
+    tickets
+      .map((t) => t.sprint)
+      .filter((sprint): sprint is number => sprint != null && !isNaN(sprint))
+  );
   return Array.from(sprints).sort((a, b) => b - a);
 };
 
