@@ -29,12 +29,16 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleFileUpload = async (file: File) => {
+    console.log("File upload started:", file.name, file.type);
     setIsLoading(true);
     try {
+      console.log("Parsing Excel file...");
       const parsedTickets = await parseExcelFile(file);
+      console.log("Parsed tickets:", parsedTickets.length, parsedTickets);
       setTickets(parsedTickets);
       
       const sprints = getAvailableSprints(parsedTickets);
+      console.log("Available sprints:", sprints);
       if (sprints.length > 0) {
         setSelectedSprint(sprints[0]);
       }
