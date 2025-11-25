@@ -1,11 +1,158 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import { FileUpload } from "@/components/FileUpload";
+import { MetricCard } from "@/components/MetricCard";
+import { PriorityChart } from "@/components/PriorityChart";
+import { DistributionTable } from "@/components/DistributionTable";
+import { SLAComplianceCard } from "@/components/SLAComplianceCard";
+import { parseExcelFile } from "@/utils/excelParser";
+import { calculateSprintMetrics, getAvailableSprints, formatMinutesToTime } from "@/utils/metricsCalculator";
+import { ProcessedTicket } from "@/types/ticket";
+import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Clock,
+  CheckCircle2,
+  TrendingUp,
+  FileText,
+  BarChart3,
+} from "lucide-react";
 
 const Index = () => {
+  const [tickets, setTickets] = useState<ProcessedTicket[]>([]);
+  const [selectedSprint, setSelectedSprint] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleFileUpload = async (file: File) => {
+    setIsLoading(true);
+    try {
+      const parsedTickets = await parseExcelFile(file);
+      setTickets(parsedTickets);
+      
+      const sprints = getAvailableSprints(parsedTickets);
+      if (sprints.length > 0) {
+        setSelectedSprint(sprints[0]);
+      }
+      
+      toast.success(`Successfully loaded ${parsedTickets.length} support tickets`);
+    } catch (error) {
+      console.error("Error parsing file:", error);
+      toast.error("Failed to parse Excel file. Please check the file format.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const availableSprints = getAvailableSprints(tickets);
+  const metrics = selectedSprint ? calculateSprintMetrics(tickets, selectedSprint) : null;
+
+  if (tickets.length === 0) {
+    return (
+      <div className="min-h-screen bg-background p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-foreground mb-2">
+              Support Indicators Dashboard
+            </h1>
+            <p className="text-muted-foreground">
+              Upload your Excel file to visualize support metrics automatically
+            </p>
+          </div>
+          <FileUpload onFileUpload={handleFileUpload} />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-background p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-foreground mb-2">
+              Support Indicators Dashboard
+            </h1>
+            <p className="text-muted-foreground">
+              {tickets.length} tickets loaded from Excel
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <Select
+              value={selectedSprint?.toString()}
+              onValueChange={(value) => setSelectedSprint(parseInt(value))}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select Sprint" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableSprints.map((sprint) => (
+                  <SelectItem key={sprint} value={sprint.toString()}>
+                    Sprint {sprint}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FileUpload onFileUpload={handleFileUpload} />
+          </div>
+        </div>
+
+        {metrics && (
+          <>
+            {/* Key Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <MetricCard
+                title="Total Tickets"
+                value={metrics.totalTickets}
+                icon={FileText}
+                variant="default"
+              />
+              <MetricCard
+                title="Average Resolution Time"
+                value={formatMinutesToTime(metrics.averageResolutionTime)}
+                subtitle={`Total: ${formatMinutesToTime(metrics.totalResolutionTime)}`}
+                icon={Clock}
+                variant="default"
+              />
+              <MetricCard
+                title="Closure Rate"
+                value={`${metrics.closureRate.toFixed(1)}%`}
+                icon={CheckCircle2}
+                variant={metrics.closureRate >= 80 ? "success" : "warning"}
+              />
+              <MetricCard
+                title="Escalation Rate"
+                value={`${metrics.escalationRate.toFixed(1)}%`}
+                icon={TrendingUp}
+                variant={metrics.escalationRate <= 20 ? "success" : "warning"}
+              />
+            </div>
+
+            {/* Charts and Tables */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <PriorityChart data={metrics.priorityDistribution} />
+              <SLAComplianceCard data={metrics.slaCompliance} />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <DistributionTable
+                title="Tickets per Person"
+                data={metrics.ticketsPerPerson}
+                totalTickets={metrics.totalTickets}
+              />
+              <DistributionTable
+                title="Tickets per Client"
+                data={metrics.ticketsPerClient}
+                totalTickets={metrics.totalTickets}
+              />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
