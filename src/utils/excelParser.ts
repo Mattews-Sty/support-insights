@@ -74,10 +74,15 @@ const parseExcelDate = (dateValue: any): Date => {
   return new Date();
 };
 
-const parseTimeToMinutes = (timeStr: string): number => {
+const parseTimeToMinutes = (timeStr: any): number => {
   if (!timeStr) return 0;
   
-  const parts = timeStr.split(':');
+  // Convert to string if it's a number (Excel sometimes stores time as decimal)
+  const timeString = typeof timeStr === 'number' 
+    ? new Date(timeStr * 24 * 60 * 60 * 1000).toISOString().substr(11, 8)
+    : String(timeStr);
+  
+  const parts = timeString.split(':');
   if (parts.length === 3) {
     const hours = parseInt(parts[0], 10);
     const minutes = parseInt(parts[1], 10);
