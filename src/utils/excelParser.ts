@@ -39,6 +39,20 @@ export const parseExcelFile = async (file: File): Promise<ProcessedTicket[]> => 
   });
 };
 
+const calculateSprintNumber = (date: Date): number => {
+  // Each sprint is 15 days
+  // Sprint 1: Jan 1-15, Sprint 2: Jan 16-31
+  // Sprint 3: Feb 1-15, Sprint 4: Feb 16-28/29
+  // etc.
+  const month = date.getMonth(); // 0-11
+  const day = date.getDate(); // 1-31
+  
+  // Calculate sprint number: 2 sprints per month
+  const sprintNumber = (month * 2) + (day <= 15 ? 1 : 2);
+  
+  return sprintNumber;
+};
+
 const processTicket = (row: TicketRow, id: string): ProcessedTicket => {
   const requestDate = parseExcelDate(row["FECHA DE SOLICITUD"]);
   const resolutionDate = row["FECHA DE SOLUCIÓN"] 
@@ -56,7 +70,7 @@ const processTicket = (row: TicketRow, id: string): ProcessedTicket => {
     assignee: row["ASIGNACIÓN"],
     status: row["ESTADO"],
     resolutionDate,
-    sprint: row["SP"],
+    sprint: calculateSprintNumber(requestDate),
     resolutionTime,
     isEscalated,
   };
