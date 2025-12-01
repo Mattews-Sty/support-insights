@@ -84,8 +84,18 @@ const processTicket = (row: TicketRow, id: string): ProcessedTicket => {
   const resolutionTime = parseTimeToMinutes(resolutionTimeValue);
   const isEscalated = LEVEL_2_AGENTS.includes(assigneeValue);
 
-  // Use sprint from SPRINT column, default to 0 if not available
-  const sprint = typeof sprintValue === 'number' ? sprintValue : parseInt(sprintValue) || 0;
+  // Use sprint from SPRINT column, or calculate from date if not available
+  let sprint: number;
+  if (typeof sprintValue === 'number' && sprintValue > 0) {
+    sprint = sprintValue;
+  } else if (typeof sprintValue === 'string' && parseInt(sprintValue) > 0) {
+    sprint = parseInt(sprintValue);
+  } else {
+    // Calculate sprint from date: 2 sprints per month
+    const month = requestDate.getUTCMonth();
+    const day = requestDate.getUTCDate();
+    sprint = (month * 2) + (day <= 15 ? 1 : 2);
+  }
 
   return {
     id,
