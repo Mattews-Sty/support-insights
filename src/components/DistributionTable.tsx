@@ -30,9 +30,9 @@ export const DistributionTable = ({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead className="text-right">Count</TableHead>
-              <TableHead className="text-right">Percentage</TableHead>
+              <TableHead>Nombre</TableHead>
+              <TableHead className="text-right">Cantidad</TableHead>
+              <TableHead className="text-right">Porcentaje</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

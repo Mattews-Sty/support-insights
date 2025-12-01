@@ -37,13 +37,13 @@ export const FileUpload = ({ onFileUpload }: FileUploadProps) => {
       <label className="flex flex-col items-center justify-center p-12 cursor-pointer">
         <Upload className="w-12 h-12 text-muted-foreground mb-4" />
         <p className="text-lg font-medium text-foreground mb-2">
-          Upload Excel File
+          Subir Archivo Excel
         </p>
         <p className="text-sm text-muted-foreground mb-4">
-          Drag and drop or click to browse
+          Arrastra y suelta o haz clic para buscar
         </p>
         <p className="text-xs text-muted-foreground">
-          Supports .xlsx and .xls files
+          Soporta archivos .xlsx y .xls
         </p>
         <input
           type="file"

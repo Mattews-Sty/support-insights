@@ -21,7 +21,7 @@ export const PriorityChart = ({ data }: PriorityChartProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Priority Distribution</CardTitle>
+        <CardTitle>Distribución por Prioridad</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>

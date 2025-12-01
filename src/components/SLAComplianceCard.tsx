@@ -9,7 +9,7 @@ export const SLAComplianceCard = ({ data }: SLAComplianceCardProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>SLA Compliance</CardTitle>
+        <CardTitle>Cumplimiento de SLA</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {Object.entries(data).map(([priority, compliance]) => (
