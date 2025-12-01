@@ -1,73 +1,101 @@
-# Welcome to your Lovable project
+# Support Insights
 
-## Project info
+Panel de Indicadores de Soporte - Prototipo MVP
 
-**URL**: https://lovable.dev/projects/c30e04b0-1e79-49ce-bdaa-2fde3fcb9dcb
+## Descripcion
 
-## How can I edit this code?
+Aplicacion web para visualizar automaticamente indicadores de soporte a partir de archivos Excel. Permite cargar un archivo Excel con datos de tickets y genera un dashboard interactivo con metricas, graficos y tablas de distribucion por sprint.
 
-There are several ways of editing your application.
+## Demo
 
-**Use Lovable**
+https://mattews-sty.github.io/support-insights/
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/c30e04b0-1e79-49ce-bdaa-2fde3fcb9dcb) and start prompting.
+## Funcionalidades
 
-Changes made via Lovable will be committed automatically to this repo.
+- Carga de archivos Excel (.xlsx, .xls) con drag and drop
+- Selector de sprint para filtrar datos
+- Visualizacion de metricas clave:
+  - Total de tickets
+  - Tiempo promedio de resolucion
+  - Tasa de cierre
+  - Tasa de escalamiento
+- Graficos de distribucion por prioridad y estado
+- Cumplimiento de SLA por nivel de prioridad
+- Tablas de distribucion por persona y cliente
 
-**Use your preferred IDE**
+## Tecnologias
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- React 18
+- TypeScript
+- Vite
+- Tailwind CSS
+- shadcn/ui
+- Recharts
+- xlsx
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Instalacion
 
-Follow these steps:
+Requisito: Node.js y npm instalados - [instalar con nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Clonar el repositorio
+git clone git@github.com:Mattews-Sty/support-insights.git
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Navegar al directorio
+cd support-insights
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Instalar dependencias
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Iniciar servidor de desarrollo
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Scripts
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+| Comando | Descripcion |
+|---------|-------------|
+| `npm run dev` | Inicia servidor de desarrollo en puerto 8080 |
+| `npm run build` | Genera build de produccion en /dist |
+| `npm run preview` | Previsualiza build de produccion |
+| `npm run lint` | Ejecuta ESLint |
 
-**Use GitHub Codespaces**
+## Estructura del Proyecto
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```
+src/
+├── components/
+│   ├── ui/                    # Componentes shadcn/ui
+│   ├── FileUpload.tsx         # Carga de archivos
+│   ├── MetricCard.tsx         # Tarjetas de metricas
+│   ├── PriorityChart.tsx      # Grafico de prioridades
+│   ├── StatusChart.tsx        # Grafico de estados
+│   ├── SLAComplianceCard.tsx  # Cumplimiento SLA
+│   └── DistributionTable.tsx  # Tablas de distribucion
+├── pages/
+│   └── Index.tsx              # Dashboard principal
+├── types/
+│   └── ticket.ts              # Tipos TypeScript
+├── utils/
+│   ├── excelParser.ts         # Procesador de Excel
+│   └── metricsCalculator.ts   # Calculador de metricas
+└── App.tsx
+```
 
-## What technologies are used for this project?
+## Formato del Excel
 
-This project is built with:
+El archivo Excel debe contener hojas con nombres de meses en espanol (enero, febrero, etc.) con las siguientes columnas:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- FECHA DE SOLICITUD
+- SPRINT
+- CLIENTE
+- TIPO DE SOLICITUD (debe ser "Soporte")
+- PRIORIDAD
+- ASIGNACION
+- ESTADO
+- FECHA DE SOLUCION
+- TIEMPO DE SOLUCION
 
-## How can I deploy this project?
+## Deploy
 
-Simply open [Lovable](https://lovable.dev/projects/c30e04b0-1e79-49ce-bdaa-2fde3fcb9dcb) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+El proyecto se despliega automaticamente en GitHub Pages mediante GitHub Actions al hacer push a la rama main.
