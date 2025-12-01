@@ -1,5 +1,6 @@
 export interface TicketRow {
   "FECHA DE SOLICITUD": string;
+  "SPRINT": number;
   "DÍA": string;
   "CLIENTE": string;
   "TIPO DE SOLICITUD": string;
@@ -36,6 +37,7 @@ export interface SprintMetrics {
   closureRate: number; // percentage
   escalationRate: number; // percentage
   priorityDistribution: Record<string, number>;
+  statusDistribution: Record<string, number>;
   slaCompliance: Record<string, number>;
   ticketsPerPerson: Record<string, number>;
   ticketsPerClient: Record<string, number>;

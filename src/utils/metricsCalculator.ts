@@ -16,6 +16,7 @@ export const calculateSprintMetrics = (
       closureRate: 0,
       escalationRate: 0,
       priorityDistribution: {},
+      statusDistribution: {},
       slaCompliance: {},
       ticketsPerPerson: {},
       ticketsPerClient: {},
@@ -46,6 +47,18 @@ export const calculateSprintMetrics = (
   // Convert to percentages
   Object.keys(priorityDistribution).forEach((key) => {
     priorityDistribution[key] = (priorityDistribution[key] / totalTickets) * 100;
+  });
+
+  // Status distribution
+  const statusDistribution: Record<string, number> = {};
+  sprintTickets.forEach((t) => {
+    const status = t.status || 'Unknown';
+    statusDistribution[status] = (statusDistribution[status] || 0) + 1;
+  });
+
+  // Convert to percentages
+  Object.keys(statusDistribution).forEach((key) => {
+    statusDistribution[key] = (statusDistribution[key] / totalTickets) * 100;
   });
 
   // SLA Compliance
@@ -83,6 +96,7 @@ export const calculateSprintMetrics = (
     closureRate,
     escalationRate,
     priorityDistribution,
+    statusDistribution,
     slaCompliance,
     ticketsPerPerson,
     ticketsPerClient,
