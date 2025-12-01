@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FileUpload } from "@/components/FileUpload";
 import { MetricCard } from "@/components/MetricCard";
 import { PriorityChart } from "@/components/PriorityChart";
+import { StatusChart } from "@/components/StatusChart";
 import { DistributionTable } from "@/components/DistributionTable";
 import { SLAComplianceCard } from "@/components/SLAComplianceCard";
 import { parseExcelFile } from "@/utils/excelParser";
@@ -61,10 +62,10 @@ const Index = () => {
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-foreground mb-2">
-              Support Indicators Dashboard
+              Panel de Indicadores de Soporte
             </h1>
             <p className="text-muted-foreground">
-              Upload your Excel file to visualize support metrics automatically
+              Sube tu archivo Excel para visualizar las métricas de soporte automáticamente
             </p>
           </div>
           <FileUpload onFileUpload={handleFileUpload} />
@@ -80,10 +81,10 @@ const Index = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold text-foreground mb-2">
-              Support Indicators Dashboard
+              Panel de Indicadores de Soporte
             </h1>
             <p className="text-muted-foreground">
-              {tickets.length} tickets loaded from Excel
+              {tickets.length} tickets cargados desde Excel
             </p>
           </div>
           <div className="flex items-center gap-4">
@@ -92,7 +93,7 @@ const Index = () => {
               onValueChange={(value) => setSelectedSprint(parseInt(value))}
             >
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select Sprint" />
+                <SelectValue placeholder="Seleccionar Sprint" />
               </SelectTrigger>
               <SelectContent>
                 {availableSprints.map((sprint) => (
@@ -111,26 +112,26 @@ const Index = () => {
             {/* Key Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <MetricCard
-                title="Total Tickets"
+                title="Total de Tickets"
                 value={metrics.totalTickets}
                 icon={FileText}
                 variant="default"
               />
               <MetricCard
-                title="Average Resolution Time"
+                title="Tiempo Promedio de Resolución"
                 value={formatMinutesToTime(metrics.averageResolutionTime)}
                 subtitle={`Total: ${formatMinutesToTime(metrics.totalResolutionTime)}`}
                 icon={Clock}
                 variant="default"
               />
               <MetricCard
-                title="Closure Rate"
+                title="Tasa de Cierre"
                 value={`${metrics.closureRate.toFixed(1)}%`}
                 icon={CheckCircle2}
                 variant={metrics.closureRate >= 80 ? "success" : "warning"}
               />
               <MetricCard
-                title="Escalation Rate"
+                title="Tasa de Escalamiento"
                 value={`${metrics.escalationRate.toFixed(1)}%`}
                 icon={TrendingUp}
                 variant={metrics.escalationRate <= 20 ? "success" : "warning"}
@@ -140,17 +141,21 @@ const Index = () => {
             {/* Charts and Tables */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <PriorityChart data={metrics.priorityDistribution} />
+              <StatusChart data={metrics.statusDistribution} />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <SLAComplianceCard data={metrics.slaCompliance} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <DistributionTable
-                title="Tickets per Person"
+                title="Tickets por Persona"
                 data={metrics.ticketsPerPerson}
                 totalTickets={metrics.totalTickets}
               />
               <DistributionTable
-                title="Tickets per Client"
+                title="Tickets por Cliente"
                 data={metrics.ticketsPerClient}
                 totalTickets={metrics.totalTickets}
               />
