@@ -3,6 +3,20 @@ import { TicketRow, ProcessedTicket } from '@/types/ticket';
 
 const LEVEL_2_AGENTS = ['Agent1', 'Agent2']; // Configure as needed
 
+const getColumnValue = (row: any, columnName: string): any => {
+  // Normalize the column name to lowercase for case-insensitive comparison
+  const normalizedSearch = columnName.toLowerCase();
+
+  // Find the actual key in the row that matches (case-insensitive)
+  for (const key of Object.keys(row)) {
+    if (key.toLowerCase() === normalizedSearch) {
+      return row[key];
+    }
+  }
+
+  return undefined;
+};
+
 export const parseExcelFile = async (file: File): Promise<ProcessedTicket[]> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -13,16 +27,28 @@ export const parseExcelFile = async (file: File): Promise<ProcessedTicket[]> => 
         const workbook = XLSX.read(data, { type: 'binary' });
         const allTickets: ProcessedTicket[] = [];
 
-        // Process all sheets except "Resumen"
+        // Valid month names in Spanish
+        const validMonths = [
+          'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+          'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+        ];
+
+        // Process only sheets with month names
         workbook.SheetNames.forEach((sheetName) => {
-          if (sheetName.toLowerCase() === 'resumen') return;
+          const normalizedName = sheetName.toLowerCase().trim();
+
+          // Skip if not a valid month name
+          if (!validMonths.includes(normalizedName)) return;
 
           const worksheet = workbook.Sheets[sheetName];
           const jsonData: TicketRow[] = XLSX.utils.sheet_to_json(worksheet);
 
           // Filter only "Soporte" tickets and process them
           const supportTickets = jsonData
-            .filter((row) => row["TIPO DE SOLICITUD"] === "Soporte")
+            .filter((row) => {
+              const tipoSolicitud = getColumnValue(row, "TIPO DE SOLICITUD");
+              return tipoSolicitud === "Soporte";
+            })
             .map((row, index) => processTicket(row, `${sheetName}-${index}`));
 
           allTickets.push(...supportTickets);
@@ -39,38 +65,37 @@ export const parseExcelFile = async (file: File): Promise<ProcessedTicket[]> => 
   });
 };
 
-const calculateSprintNumber = (date: Date): number => {
-  // Each sprint is 15 days
-  // Sprint 1: Jan 1-15, Sprint 2: Jan 16-31
-  // Sprint 3: Feb 1-15, Sprint 4: Feb 16-28/29
-  // etc.
-  const month = date.getMonth(); // 0-11
-  const day = date.getDate(); // 1-31
-  
-  // Calculate sprint number: 2 sprints per month
-  const sprintNumber = (month * 2) + (day <= 15 ? 1 : 2);
-  
-  return sprintNumber;
-};
-
 const processTicket = (row: TicketRow, id: string): ProcessedTicket => {
-  const requestDate = parseExcelDate(row["FECHA DE SOLICITUD"]);
-  const resolutionDate = row["FECHA DE SOLUCIÓN"] 
-    ? parseExcelDate(row["FECHA DE SOLUCIÓN"]) 
+  // Handle different column name variations (case-insensitive)
+  const requestDateValue = getColumnValue(row, "FECHA DE SOLICITUD");
+  const resolutionDateValue = getColumnValue(row, "FECHA DE SOLUCIÓN");
+  const resolutionTimeValue = getColumnValue(row, "TIEMPO DE SOLUCIÓN");
+  const assigneeValue = getColumnValue(row, "ASIGNACIÓN");
+  const clientValue = getColumnValue(row, "CLIENTE");
+  const priorityValue = getColumnValue(row, "PRIORIDAD");
+  const statusValue = getColumnValue(row, "ESTADO");
+  const sprintValue = getColumnValue(row, "SPRINT");
+
+  const requestDate = parseExcelDate(requestDateValue);
+  const resolutionDate = resolutionDateValue
+    ? parseExcelDate(resolutionDateValue)
     : undefined;
-  
-  const resolutionTime = parseTimeToMinutes(row["TIEMPO DE SOLUCIÓN"]);
-  const isEscalated = LEVEL_2_AGENTS.includes(row["ASIGNACIÓN"]);
+
+  const resolutionTime = parseTimeToMinutes(resolutionTimeValue);
+  const isEscalated = LEVEL_2_AGENTS.includes(assigneeValue);
+
+  // Use sprint from SPRINT column, default to 0 if not available
+  const sprint = typeof sprintValue === 'number' ? sprintValue : parseInt(sprintValue) || 0;
 
   return {
     id,
     requestDate,
-    client: row["CLIENTE"],
-    priority: row["PRIORIDAD"],
-    assignee: row["ASIGNACIÓN"],
-    status: row["ESTADO"],
+    client: clientValue,
+    priority: priorityValue,
+    assignee: assigneeValue,
+    status: statusValue,
     resolutionDate,
-    sprint: calculateSprintNumber(requestDate),
+    sprint,
     resolutionTime,
     isEscalated,
   };
@@ -79,8 +104,11 @@ const processTicket = (row: TicketRow, id: string): ProcessedTicket => {
 const parseExcelDate = (dateValue: any): Date => {
   if (dateValue instanceof Date) return dateValue;
   if (typeof dateValue === 'number') {
-    // Excel serial date number
-    return new Date((dateValue - 25569) * 86400 * 1000);
+    // Excel serial date number - use UTC to avoid timezone issues
+    // Add 12 hours (43200000 ms) to center the date and avoid edge cases
+    const utcDays = Math.floor(dateValue - 25569);
+    const utcValue = utcDays * 86400 * 1000;
+    return new Date(utcValue + 43200000); // +12 hours
   }
   if (typeof dateValue === 'string') {
     return new Date(dateValue);
