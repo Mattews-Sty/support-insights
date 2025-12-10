@@ -135,7 +135,7 @@ const Index = () => {
                 </SelectContent>
               </Select>
             )}
-            <FileUpload onFileUpload={handleFileUpload} />
+            <FileUpload onFileUpload={handleFileUpload} compact />
           </div>
         </div>
 

@@ -1,12 +1,20 @@
 import { Upload } from "lucide-react";
 import { useCallback } from "react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface FileUploadProps {
   onFileUpload: (file: File) => void;
+  compact?: boolean;
 }
 
-export const FileUpload = ({ onFileUpload }: FileUploadProps) => {
+export const FileUpload = ({ onFileUpload, compact = false }: FileUploadProps) => {
   const handleDrop = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
@@ -27,6 +35,41 @@ export const FileUpload = ({ onFileUpload }: FileUploadProps) => {
     },
     [onFileUpload]
   );
+
+  if (compact) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className="relative"
+              asChild
+              onDrop={handleDrop}
+              onDragOver={(e) => e.preventDefault()}
+            >
+              <label className="cursor-pointer flex items-center justify-center">
+                <Upload className="h-4 w-4" />
+                <input
+                  type="file"
+                  className="hidden"
+                  accept=".xlsx,.xls"
+                  onChange={handleFileInput}
+                />
+              </label>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="max-w-xs">
+            <p className="font-medium">Subir nuevo archivo Excel</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Arrastra o haz clic para cargar (.xlsx, .xls)
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
 
   return (
     <Card
