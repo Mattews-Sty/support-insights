@@ -29,7 +29,7 @@ export const SprintSummaryTable = ({ data }: SprintSummaryTableProps) => {
                 <TableHead className="text-center">Total de Horas</TableHead>
                 <TableHead className="text-center">Total Tickets</TableHead>
                 <TableHead className="text-center">Promedio por Ticket</TableHead>
-                <TableHead>Fecha</TableHead>
+                <TableHead className="text-center">Fecha</TableHead>
                 <TableHead>Clientes con más solicitudes</TableHead>
               </TableRow>
             </TableHeader>
@@ -41,7 +41,7 @@ export const SprintSummaryTable = ({ data }: SprintSummaryTableProps) => {
                   <TableCell className="text-center font-mono">{row.totalHours}</TableCell>
                   <TableCell className="text-center">{row.totalTickets}</TableCell>
                   <TableCell className="text-center font-mono">{row.averageTimePerTicket}</TableCell>
-                  <TableCell className="text-sm">{row.dateRange}</TableCell>
+                  <TableCell className="text-center text-sm">{row.dateRange}</TableCell>
                   <TableCell>
                     <div className="space-y-1">
                       {row.topClients.map((client, index) => (
