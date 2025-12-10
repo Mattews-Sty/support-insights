@@ -6,8 +6,9 @@ import { StatusChart } from "@/components/StatusChart";
 import { DistributionTable } from "@/components/DistributionTable";
 import { SLAComplianceCard } from "@/components/SLAComplianceCard";
 import { RequestTypeChart } from "@/components/RequestTypeChart";
+import { SprintSummaryTable } from "@/components/SprintSummaryTable";
 import { parseExcelFile } from "@/utils/excelParser";
-import { calculateSprintMetrics, getAvailableSprints, formatMinutesToTime } from "@/utils/metricsCalculator";
+import { calculateSprintMetrics, getAvailableSprints, formatMinutesToTime, calculateAllSprintsSummary } from "@/utils/metricsCalculator";
 import { ProcessedTicket } from "@/types/ticket";
 import { toast } from "sonner";
 import {
@@ -22,13 +23,18 @@ import {
   CheckCircle2,
   TrendingUp,
   FileText,
-  BarChart3,
+  LayoutGrid,
+  Table,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+type ViewMode = 'detail' | 'summary';
 
 const Index = () => {
   const [tickets, setTickets] = useState<ProcessedTicket[]>([]);
   const [selectedSprint, setSelectedSprint] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('detail');
 
   const handleFileUpload = async (file: File) => {
     console.log("File upload started:", file.name, file.type);
@@ -56,6 +62,7 @@ const Index = () => {
 
   const availableSprints = getAvailableSprints(tickets);
   const metrics = selectedSprint ? calculateSprintMetrics(tickets, selectedSprint) : null;
+  const sprintSummary = calculateAllSprintsSummary(tickets);
 
   if (tickets.length === 0) {
     return (
@@ -89,26 +96,56 @@ const Index = () => {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <Select
-              value={selectedSprint?.toString()}
-              onValueChange={(value) => setSelectedSprint(parseInt(value))}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Seleccionar Sprint" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableSprints.map((sprint) => (
-                  <SelectItem key={sprint} value={sprint.toString()}>
-                    Sprint {sprint}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {/* View Mode Toggle */}
+            <div className="flex items-center border rounded-lg p-1">
+              <Button
+                variant={viewMode === 'detail' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('detail')}
+                className="gap-2"
+              >
+                <LayoutGrid className="h-4 w-4" />
+                Detalle
+              </Button>
+              <Button
+                variant={viewMode === 'summary' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('summary')}
+                className="gap-2"
+              >
+                <Table className="h-4 w-4" />
+                Resumen
+              </Button>
+            </div>
+
+            {viewMode === 'detail' && (
+              <Select
+                value={selectedSprint?.toString()}
+                onValueChange={(value) => setSelectedSprint(parseInt(value))}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Seleccionar Sprint" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableSprints.map((sprint) => (
+                    <SelectItem key={sprint} value={sprint.toString()}>
+                      Sprint {sprint}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <FileUpload onFileUpload={handleFileUpload} />
           </div>
         </div>
 
-        {metrics && (
+        {/* Summary View */}
+        {viewMode === 'summary' && sprintSummary.length > 0 && (
+          <SprintSummaryTable data={sprintSummary} />
+        )}
+
+        {/* Detail View */}
+        {viewMode === 'detail' && metrics && (
           <>
             {/* Key Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
