@@ -44,3 +44,13 @@ export interface SprintMetrics {
   ticketsPerClient: Record<string, number>;
   requestTypeDistribution: Record<string, number>;
 }
+
+export interface SprintSummary {
+  month: string;
+  sprint: number;
+  totalHours: string;
+  totalTickets: number;
+  averageTimePerTicket: string;
+  dateRange: string;
+  topClients: { name: string; count: number }[];
+}
