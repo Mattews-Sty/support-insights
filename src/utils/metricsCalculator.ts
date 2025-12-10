@@ -20,6 +20,7 @@ export const calculateSprintMetrics = (
       slaCompliance: {},
       ticketsPerPerson: {},
       ticketsPerClient: {},
+      requestTypeDistribution: {},
     };
   }
 
@@ -88,6 +89,18 @@ export const calculateSprintMetrics = (
     ticketsPerClient[key] = (ticketsPerClient[key] / totalTickets) * 100;
   });
 
+  // Request type distribution
+  const requestTypeDistribution: Record<string, number> = {};
+  sprintTickets.forEach((t) => {
+    const requestType = t.requestType || 'Sin tipo';
+    requestTypeDistribution[requestType] = (requestTypeDistribution[requestType] || 0) + 1;
+  });
+
+  // Convert to percentages
+  Object.keys(requestTypeDistribution).forEach((key) => {
+    requestTypeDistribution[key] = (requestTypeDistribution[key] / totalTickets) * 100;
+  });
+
   return {
     sprint,
     totalTickets,
@@ -100,6 +113,7 @@ export const calculateSprintMetrics = (
     slaCompliance,
     ticketsPerPerson,
     ticketsPerClient,
+    requestTypeDistribution,
   };
 };
 
