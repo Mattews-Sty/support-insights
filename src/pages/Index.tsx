@@ -5,6 +5,7 @@ import { PriorityChart } from "@/components/PriorityChart";
 import { StatusChart } from "@/components/StatusChart";
 import { DistributionTable } from "@/components/DistributionTable";
 import { SLAComplianceCard } from "@/components/SLAComplianceCard";
+import { RequestTypeChart } from "@/components/RequestTypeChart";
 import { parseExcelFile } from "@/utils/excelParser";
 import { calculateSprintMetrics, getAvailableSprints, formatMinutesToTime } from "@/utils/metricsCalculator";
 import { ProcessedTicket } from "@/types/ticket";
@@ -146,6 +147,7 @@ const Index = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <SLAComplianceCard data={metrics.slaCompliance} />
+              <RequestTypeChart data={metrics.requestTypeDistribution} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
