@@ -1,4 +1,4 @@
-import { ProcessedTicket, SprintMetrics } from '@/types/ticket';
+import { ProcessedTicket, SprintMetrics, SprintSummary } from '@/types/ticket';
 
 export const calculateSprintMetrics = (
   tickets: ProcessedTicket[],
@@ -169,4 +169,90 @@ export const formatMinutesToTime = (minutes: number): string => {
   const mins = Math.floor(minutes % 60);
   const secs = Math.floor((minutes % 1) * 60);
   return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+};
+
+const MONTH_NAMES = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+];
+
+const getMonthFromSprint = (sprint: number): string => {
+  // 2 sprints per month: sprints 1-2 = Enero, 3-4 = Febrero, etc.
+  const monthIndex = Math.floor((sprint - 1) / 2);
+  return MONTH_NAMES[monthIndex] || 'Desconocido';
+};
+
+const formatDateRange = (startDate: Date, endDate: Date): string => {
+  const formatDate = (date: Date) => {
+    const day = date.getUTCDate();
+    const month = MONTH_NAMES[date.getUTCMonth()].toLowerCase();
+    const year = date.getUTCFullYear();
+    return `${day} de ${month}`;
+  };
+
+  const start = formatDate(startDate);
+  const endDay = endDate.getUTCDate();
+  const endMonth = MONTH_NAMES[endDate.getUTCMonth()].toLowerCase();
+  const endYear = endDate.getUTCFullYear();
+
+  return `${start} al ${endDay} de ${endMonth} ${endYear}`;
+};
+
+export const calculateAllSprintsSummary = (tickets: ProcessedTicket[]): SprintSummary[] => {
+  const sprints = getAvailableSprints(tickets);
+
+  return sprints
+    .sort((a, b) => a - b) // Order by sprint number ascending
+    .map((sprint) => {
+      const sprintTickets = tickets.filter((t) => t.sprint === sprint);
+      const totalTickets = sprintTickets.length;
+
+      if (totalTickets === 0) {
+        return {
+          month: getMonthFromSprint(sprint),
+          sprint,
+          totalHours: '00:00:00',
+          totalTickets: 0,
+          averageTimePerTicket: '00:00:00',
+          dateRange: '-',
+          topClients: [],
+        };
+      }
+
+      // Total resolution time
+      const totalResolutionTime = sprintTickets.reduce((sum, t) => sum + t.resolutionTime, 0);
+      const averageResolutionTime = totalResolutionTime / totalTickets;
+
+      // Date range
+      const dates = sprintTickets
+        .map((t) => t.requestDate)
+        .filter((d) => d instanceof Date && !isNaN(d.getTime()))
+        .sort((a, b) => a.getTime() - b.getTime());
+
+      const dateRange = dates.length > 0
+        ? formatDateRange(dates[0], dates[dates.length - 1])
+        : '-';
+
+      // Top clients (count, not percentage)
+      const clientCounts: Record<string, number> = {};
+      sprintTickets.forEach((t) => {
+        const client = t.client || 'Unknown';
+        clientCounts[client] = (clientCounts[client] || 0) + 1;
+      });
+
+      const topClients = Object.entries(clientCounts)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 3); // Top 3 clients
+
+      return {
+        month: getMonthFromSprint(sprint),
+        sprint,
+        totalHours: formatMinutesToTime(totalResolutionTime),
+        totalTickets,
+        averageTimePerTicket: formatMinutesToTime(averageResolutionTime),
+        dateRange,
+        topClients,
+      };
+    });
 };
