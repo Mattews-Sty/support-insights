@@ -43,15 +43,16 @@ export const parseExcelFile = async (file: File): Promise<ProcessedTicket[]> => 
           const worksheet = workbook.Sheets[sheetName];
           const jsonData: TicketRow[] = XLSX.utils.sheet_to_json(worksheet);
 
-          // Filter only "Soporte" tickets and process them
-          const supportTickets = jsonData
+          // Process all tickets (no filter by request type)
+          const processedTickets = jsonData
             .filter((row) => {
+              // Only filter out rows without essential data
               const tipoSolicitud = getColumnValue(row, "TIPO DE SOLICITUD");
-              return tipoSolicitud === "Soporte";
+              return tipoSolicitud != null && tipoSolicitud !== "";
             })
             .map((row, index) => processTicket(row, `${sheetName}-${index}`));
 
-          allTickets.push(...supportTickets);
+          allTickets.push(...processedTickets);
         });
 
         resolve(allTickets);
@@ -75,6 +76,7 @@ const processTicket = (row: TicketRow, id: string): ProcessedTicket => {
   const priorityValue = getColumnValue(row, "PRIORIDAD");
   const statusValue = getColumnValue(row, "ESTADO");
   const sprintValue = getColumnValue(row, "SPRINT");
+  const requestTypeValue = getColumnValue(row, "TIPO DE SOLICITUD");
 
   const requestDate = parseExcelDate(requestDateValue);
   const resolutionDate = resolutionDateValue
@@ -108,6 +110,7 @@ const processTicket = (row: TicketRow, id: string): ProcessedTicket => {
     sprint,
     resolutionTime,
     isEscalated,
+    requestType: requestTypeValue || 'Sin tipo',
   };
 };
 
