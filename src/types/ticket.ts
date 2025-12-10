@@ -27,6 +27,7 @@ export interface ProcessedTicket {
   sprint: number;
   resolutionTime: number; // in minutes
   isEscalated: boolean;
+  requestType: string;
 }
 
 export interface SprintMetrics {
@@ -41,4 +42,5 @@ export interface SprintMetrics {
   slaCompliance: Record<string, number>;
   ticketsPerPerson: Record<string, number>;
   ticketsPerClient: Record<string, number>;
+  requestTypeDistribution: Record<string, number>;
 }
