@@ -43,12 +43,16 @@ export const parseExcelFile = async (file: File): Promise<ProcessedTicket[]> => 
           const worksheet = workbook.Sheets[sheetName];
           const jsonData: TicketRow[] = XLSX.utils.sheet_to_json(worksheet);
 
-          // Process all tickets (no filter by request type)
+          // Process only tickets with valid sprint number
           const processedTickets = jsonData
             .filter((row) => {
-              // Only filter out rows without essential data
               const tipoSolicitud = getColumnValue(row, "TIPO DE SOLICITUD");
-              return tipoSolicitud != null && tipoSolicitud !== "";
+              const sprintValue = getColumnValue(row, "SPRINT");
+              // Must have tipo de solicitud and explicit sprint value
+              const hasValidType = tipoSolicitud != null && tipoSolicitud !== "";
+              const hasValidSprint = sprintValue != null && sprintValue !== "" &&
+                (typeof sprintValue === 'number' || (typeof sprintValue === 'string' && parseInt(sprintValue) > 0));
+              return hasValidType && hasValidSprint;
             })
             .map((row, index) => processTicket(row, `${sheetName}-${index}`));
 
@@ -86,18 +90,8 @@ const processTicket = (row: TicketRow, id: string): ProcessedTicket => {
   const resolutionTime = parseTimeToMinutes(resolutionTimeValue);
   const isEscalated = LEVEL_2_AGENTS.includes(assigneeValue);
 
-  // Use sprint from SPRINT column, or calculate from date if not available
-  let sprint: number;
-  if (typeof sprintValue === 'number' && sprintValue > 0) {
-    sprint = sprintValue;
-  } else if (typeof sprintValue === 'string' && parseInt(sprintValue) > 0) {
-    sprint = parseInt(sprintValue);
-  } else {
-    // Calculate sprint from date: 2 sprints per month
-    const month = requestDate.getUTCMonth();
-    const day = requestDate.getUTCDate();
-    sprint = (month * 2) + (day <= 15 ? 1 : 2);
-  }
+  // Use sprint from SPRINT column (already validated in filter)
+  const sprint = typeof sprintValue === 'number' ? sprintValue : parseInt(sprintValue);
 
   return {
     id,
