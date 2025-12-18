@@ -30,19 +30,26 @@ export interface ProcessedTicket {
   requestType: string;
 }
 
+export interface DistributionData {
+  percentage: number;
+  count: number;
+}
+
 export interface SprintMetrics {
   sprint: number;
   totalTickets: number;
   totalResolutionTime: number; // in minutes
   averageResolutionTime: number; // in minutes
   closureRate: number; // percentage
+  closedTickets: number; // count
   escalationRate: number; // percentage
-  priorityDistribution: Record<string, number>;
-  statusDistribution: Record<string, number>;
+  escalatedTickets: number; // count
+  priorityDistribution: Record<string, DistributionData>;
+  statusDistribution: Record<string, DistributionData>;
   slaCompliance: Record<string, number>;
   ticketsPerPerson: Record<string, number>;
   ticketsPerClient: Record<string, number>;
-  requestTypeDistribution: Record<string, number>;
+  requestTypeDistribution: Record<string, DistributionData>;
 }
 
 export interface SprintSummary {
