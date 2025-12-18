@@ -1,7 +1,8 @@
 import * as XLSX from 'xlsx';
 import { TicketRow, ProcessedTicket } from '@/types/ticket';
 
-const LEVEL_2_AGENTS = ['Agent1', 'Agent2']; // Configure as needed
+// Escalation levels that count as escalated tickets
+const ESCALATED_LEVELS = ['Nivel 2', 'Nivel 3'];
 
 const getColumnValue = (row: any, columnName: string): any => {
   // Normalize the column name to lowercase for case-insensitive comparison
@@ -81,6 +82,7 @@ const processTicket = (row: TicketRow, id: string): ProcessedTicket => {
   const statusValue = getColumnValue(row, "ESTADO");
   const sprintValue = getColumnValue(row, "SPRINT");
   const requestTypeValue = getColumnValue(row, "TIPO DE SOLICITUD");
+  const escalationValue = getColumnValue(row, "ESCALAMIENTO");
 
   const requestDate = parseExcelDate(requestDateValue);
   const resolutionDate = resolutionDateValue
@@ -88,7 +90,7 @@ const processTicket = (row: TicketRow, id: string): ProcessedTicket => {
     : undefined;
 
   const resolutionTime = parseTimeToMinutes(resolutionTimeValue);
-  const isEscalated = LEVEL_2_AGENTS.includes(assigneeValue);
+  const isEscalated = ESCALATED_LEVELS.includes(escalationValue);
 
   // Use sprint from SPRINT column (already validated in filter)
   const sprint = typeof sprintValue === 'number' ? sprintValue : parseInt(sprintValue);
