@@ -1,4 +1,4 @@
-import { ProcessedTicket, SprintMetrics, SprintSummary } from '@/types/ticket';
+import { ProcessedTicket, SprintMetrics, SprintSummary, DistributionData } from '@/types/ticket';
 
 export const calculateSprintMetrics = (
   tickets: ProcessedTicket[],
@@ -14,7 +14,9 @@ export const calculateSprintMetrics = (
       totalResolutionTime: 0,
       averageResolutionTime: 0,
       closureRate: 0,
+      closedTickets: 0,
       escalationRate: 0,
+      escalatedTickets: 0,
       priorityDistribution: {},
       statusDistribution: {},
       slaCompliance: {},
@@ -39,27 +41,35 @@ export const calculateSprintMetrics = (
   const escalationRate = (escalatedTickets / totalTickets) * 100;
 
   // Priority distribution
-  const priorityDistribution: Record<string, number> = {};
+  const priorityCounts: Record<string, number> = {};
   sprintTickets.forEach((t) => {
     const priority = t.priority || 'Unknown';
-    priorityDistribution[priority] = (priorityDistribution[priority] || 0) + 1;
+    priorityCounts[priority] = (priorityCounts[priority] || 0) + 1;
   });
 
-  // Convert to percentages
-  Object.keys(priorityDistribution).forEach((key) => {
-    priorityDistribution[key] = (priorityDistribution[key] / totalTickets) * 100;
+  // Convert to DistributionData with percentage and count
+  const priorityDistribution: Record<string, DistributionData> = {};
+  Object.keys(priorityCounts).forEach((key) => {
+    priorityDistribution[key] = {
+      percentage: (priorityCounts[key] / totalTickets) * 100,
+      count: priorityCounts[key],
+    };
   });
 
   // Status distribution
-  const statusDistribution: Record<string, number> = {};
+  const statusCounts: Record<string, number> = {};
   sprintTickets.forEach((t) => {
     const status = t.status || 'Unknown';
-    statusDistribution[status] = (statusDistribution[status] || 0) + 1;
+    statusCounts[status] = (statusCounts[status] || 0) + 1;
   });
 
-  // Convert to percentages
-  Object.keys(statusDistribution).forEach((key) => {
-    statusDistribution[key] = (statusDistribution[key] / totalTickets) * 100;
+  // Convert to DistributionData with percentage and count
+  const statusDistribution: Record<string, DistributionData> = {};
+  Object.keys(statusCounts).forEach((key) => {
+    statusDistribution[key] = {
+      percentage: (statusCounts[key] / totalTickets) * 100,
+      count: statusCounts[key],
+    };
   });
 
   // SLA Compliance
@@ -90,15 +100,19 @@ export const calculateSprintMetrics = (
   });
 
   // Request type distribution
-  const requestTypeDistribution: Record<string, number> = {};
+  const requestTypeCounts: Record<string, number> = {};
   sprintTickets.forEach((t) => {
     const requestType = t.requestType || 'Sin tipo';
-    requestTypeDistribution[requestType] = (requestTypeDistribution[requestType] || 0) + 1;
+    requestTypeCounts[requestType] = (requestTypeCounts[requestType] || 0) + 1;
   });
 
-  // Convert to percentages
-  Object.keys(requestTypeDistribution).forEach((key) => {
-    requestTypeDistribution[key] = (requestTypeDistribution[key] / totalTickets) * 100;
+  // Convert to DistributionData with percentage and count
+  const requestTypeDistribution: Record<string, DistributionData> = {};
+  Object.keys(requestTypeCounts).forEach((key) => {
+    requestTypeDistribution[key] = {
+      percentage: (requestTypeCounts[key] / totalTickets) * 100,
+      count: requestTypeCounts[key],
+    };
   });
 
   return {
@@ -107,7 +121,9 @@ export const calculateSprintMetrics = (
     totalResolutionTime,
     averageResolutionTime,
     closureRate,
+    closedTickets,
     escalationRate,
+    escalatedTickets,
     priorityDistribution,
     statusDistribution,
     slaCompliance,
