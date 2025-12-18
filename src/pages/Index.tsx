@@ -165,12 +165,14 @@ const Index = () => {
               <MetricCard
                 title="Tasa de Cierre"
                 value={`${metrics.closureRate.toFixed(1)}%`}
+                subtitle={`${metrics.closedTickets} de ${metrics.totalTickets} tickets`}
                 icon={CheckCircle2}
                 variant={metrics.closureRate >= 80 ? "success" : "warning"}
               />
               <MetricCard
                 title="Tasa de Escalamiento"
                 value={`${metrics.escalationRate.toFixed(1)}%`}
+                subtitle={`${metrics.escalatedTickets} de ${metrics.totalTickets} tickets`}
                 icon={TrendingUp}
                 variant={metrics.escalationRate <= 20 ? "success" : "warning"}
               />
