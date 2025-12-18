@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { DistributionData } from "@/types/ticket";
 
 interface PriorityChartProps {
-  data: Record<string, number>;
+  data: Record<string, DistributionData>;
 }
 
 const COLORS = [
@@ -13,10 +14,25 @@ const COLORS = [
 ];
 
 export const PriorityChart = ({ data }: PriorityChartProps) => {
-  const chartData = Object.entries(data).map(([name, value]) => ({
+  const chartData = Object.entries(data).map(([name, { percentage, count }]) => ({
     name,
-    value: Math.round(value),
+    value: Math.round(percentage),
+    count,
   }));
+
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { name: string; value: number; count: number } }> }) => {
+    if (active && payload && payload.length) {
+      const { name, value, count } = payload[0].payload;
+      return (
+        <div className="bg-popover border rounded-md shadow-md p-3">
+          <p className="font-medium">{name}</p>
+          <p className="text-sm text-muted-foreground">{value}%</p>
+          <p className="text-sm font-semibold">{count} tickets</p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <Card>
@@ -40,7 +56,7 @@ export const PriorityChart = ({ data }: PriorityChartProps) => {
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip formatter={(value) => `${value}%`} />
+            <Tooltip content={<CustomTooltip />} />
             <Legend />
           </PieChart>
         </ResponsiveContainer>
