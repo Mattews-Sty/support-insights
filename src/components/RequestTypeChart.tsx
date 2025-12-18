@@ -30,7 +30,7 @@ export const RequestTypeChart = ({ data }: RequestTypeChartProps) => {
         <div className="bg-popover border rounded-md shadow-md p-3">
           <p className="font-medium">{name}</p>
           <p className="text-sm text-muted-foreground">{value}%</p>
-          <p className="text-sm font-semibold">{count} tickets</p>
+          <p className="text-sm font-semibold">{count} {count === 1 ? 'ticket' : 'tickets'}</p>
         </div>
       );
     }
